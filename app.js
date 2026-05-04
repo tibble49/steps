@@ -66,18 +66,32 @@ let state = structuredClone(defaultState);
 
 async function startApp() {
   try {
+    console.log("Loading state from Firestore...");
     const snap = await stateDoc.get();
-    if (snap.exists) state = parseState(snap.data());
+    if (snap.exists) {
+      console.log("State loaded from Firestore:", snap.data());
+      state = parseState(snap.data());
+    } else {
+      console.log("No existing state in Firestore, starting with defaults");
+    }
   } catch (err) {
     console.error("Failed to load from Firestore, falling back to empty state.", err);
+    alert("⚠️ Database connection failed. Changes may not be saved. Check console for details.");
   }
   initialize();
-  stateDoc.onSnapshot((snap) => {
-    if (snap.exists) {
-      state = parseState(snap.data());
-      renderAll();
+  stateDoc.onSnapshot(
+    (snap) => {
+      console.log("Listener fired, snap.exists:", snap.exists);
+      if (snap.exists) {
+        console.log("Updating state from Firestore listener:", snap.data());
+        state = parseState(snap.data());
+        renderAll();
+      }
+    },
+    (err) => {
+      console.error("Firestore listener error:", err);
     }
-  });
+  );
 }
 
 startApp();
@@ -179,9 +193,15 @@ function bindEvents() {
       }
     }
 
+    const participantColors = {};
+    sampleParticipants.forEach((name, index) => {
+      participantColors[name] = TEAM_COLOR_PALETTE[index % TEAM_COLOR_PALETTE.length];
+    });
+
     state = {
       participants: [...sampleParticipants],
-      entries: seededEntries
+      entries: seededEntries,
+      participantColors
     };
 
     persistAndRender();
@@ -196,7 +216,10 @@ function bindEvents() {
 }
 
 function persistAndRender() {
-  saveState(state);
+  saveState(state).catch((err) => {
+    alert("Error saving to database. Changes may not persist. Check browser console.");
+    console.error("persistAndRender save error:", err);
+  });
   renderAll();
 }
 
@@ -386,7 +409,7 @@ function renderHistory() {
 }
 
 function saveState(nextState) {
-  stateDoc.set(nextState).catch((err) => console.error("Firestore save failed:", err));
+  return stateDoc.set(nextState, { merge: true });
 }
 
 function parseState(data) {
