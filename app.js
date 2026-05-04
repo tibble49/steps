@@ -1,4 +1,18 @@
-const STORAGE_KEY = "step-sprint-state-v1";
+// ── Firebase ────────────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBMxQerOpbyrIh-GfVnvifcj25sOIS4KBE",
+  authDomain: "steps-10112.firebaseapp.com",
+  projectId: "steps-10112",
+  storageBucket: "steps-10112.firebasestorage.app",
+  messagingSenderId: "827587203362",
+  appId: "1:827587203362:web:dd1c3dae6255af18a5d57b"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const stateDoc = db.collection("challenge").doc("state");
+// ─────────────────────────────────────────────────────────────────────────────
+
 const CHALLENGE = {
   name: "May Step Challenge",
   start: "2026-05-01",
@@ -48,8 +62,25 @@ const seedButton = document.querySelector("#seed-button");
 const resetButton = document.querySelector("#reset-button");
 const chipTemplate = document.querySelector("#chip-template");
 
-let state = loadState();
-initialize();
+let state = structuredClone(defaultState);
+
+async function startApp() {
+  try {
+    const snap = await stateDoc.get();
+    if (snap.exists) state = parseState(snap.data());
+  } catch (err) {
+    console.error("Failed to load from Firestore, falling back to empty state.", err);
+  }
+  initialize();
+  stateDoc.onSnapshot((snap) => {
+    if (snap.exists) {
+      state = parseState(snap.data());
+      renderAll();
+    }
+  });
+}
+
+startApp();
 
 function initialize() {
   renderChallengeMeta();
@@ -355,31 +386,23 @@ function renderHistory() {
 }
 
 function saveState(nextState) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+  stateDoc.set(nextState).catch((err) => console.error("Firestore save failed:", err));
 }
 
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return structuredClone(defaultState);
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed.participants) || !Array.isArray(parsed.entries)) {
-      return structuredClone(defaultState);
-    }
-
-    const participantColors =
-      parsed.participantColors && typeof parsed.participantColors === "object"
-        ? parsed.participantColors
-        : {};
-
-    return {
-      participants: parsed.participants.filter((p) => typeof p === "string"),
-      entries: parsed.entries.filter(isValidEntry),
-      participantColors
-    };
-  } catch {
-    return structuredClone(defaultState);
-  }
+function parseState(data) {
+  const participantColors =
+    data.participantColors && typeof data.participantColors === "object"
+      ? data.participantColors
+      : {};
+  return {
+    participants: Array.isArray(data.participants)
+      ? data.participants.filter((p) => typeof p === "string")
+      : [],
+    entries: Array.isArray(data.entries)
+      ? data.entries.filter(isValidEntry)
+      : [],
+    participantColors
+  };
 }
 
 function isValidEntry(entry) {
