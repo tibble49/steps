@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StepSprint Showdown</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Work+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-1" aria-hidden="true"></div>
+    <div class="bg-shape bg-shape-2" aria-hidden="true"></div>
+
+    <main class="app-shell">
+      <header class="hero">
+        <p class="eyebrow">Friendly Rivalry Tracker</p>
+        <h1>StepSprint Showdown</h1>
+        <p class="hero-copy">
+          Track daily steps, compare totals, and crown the monthly walking champion.
+        </p>
+        <div class="challenge-strip">
+          <p><strong id="challenge-name"></strong></p>
+          <p id="challenge-range"></p>
+          <p id="challenge-status"></p>
+        </div>
+      </header>
+
+      <section class="card reveal" aria-labelledby="participant-heading">
+        <div class="card-header">
+          <h2 id="participant-heading">Participants</h2>
+          <p>Add everyone in your challenge.</p>
+        </div>
+
+        <form id="participant-form" class="inline-form">
+          <label for="participant-name" class="sr-only">Name</label>
+          <input
+            id="participant-name"
+            type="text"
+            maxlength="30"
+            placeholder="Add friend name"
+            required
+          />
+          <button type="submit">Add</button>
+        </form>
+
+        <ul id="participant-list" class="chip-list"></ul>
+      </section>
+
+      <section class="card reveal" aria-labelledby="qr-heading">
+        <div class="card-header">
+          <h2 id="qr-heading">QR Code Shortcuts</h2>
+          <p>Scan to jump to each person's entry form. Or copy the link to text/email.</p>
+        </div>
+        <ul id="qr-list" class="qr-list"></ul>
+      </section>
+
+      <section class="card reveal" aria-labelledby="entry-heading">
+        <div class="card-header">
+          <h2 id="entry-heading">Daily Step Entry</h2>
+          <p>Log each person once per date. Re-entry updates that day.</p>
+        </div>
+
+        <form id="entry-form" class="entry-form">
+          <label>
+            Friend
+            <select id="entry-participant" required></select>
+          </label>
+
+          <label>
+            Date
+            <input id="entry-date" type="date" required />
+          </label>
+
+          <label>
+            Steps
+            <input id="entry-steps" type="number" min="0" max="100000" required />
+          </label>
+
+          <button type="submit">Save Steps</button>
+        </form>
+      </section>
+
+      <section class="card reveal" aria-labelledby="leaderboard-heading">
+        <div class="card-header">
+          <h2 id="leaderboard-heading">Leaderboard</h2>
+          <p>Sorted by total steps in the current challenge.</p>
+        </div>
+
+        <div class="leaderboard-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Total</th>
+                <th>Daily Avg</th>
+                <th>Behind Leader</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card reveal race-card" aria-labelledby="race-heading">
+        <div class="card-header race-header">
+          <h2 id="race-heading">Race View</h2>
+          <p>Icons move based on each person's total steps versus the leader.</p>
+        </div>
+        <ul id="race-list" class="race-list"></ul>
+      </section>
+
+      <section class="card reveal" aria-labelledby="history-heading">
+        <div class="card-header">
+          <h2 id="history-heading">Recent Entries</h2>
+          <p>Last 12 step logs across the group.</p>
+        </div>
+        <ul id="history-list" class="history-list"></ul>
+      </section>
+
+      <section class="card card-actions reveal" aria-label="App Actions">
+        <button id="seed-button" class="ghost">Load Sample Data</button>
+        <button id="reset-button" class="danger">Reset Challenge</button>
+      </section>
+    </main>
+
+    <template id="chip-template">
+      <li class="chip">
+        <input class="chip-color" type="color" aria-label="Pick team color" />
+        <span class="chip-name"></span>
+        <button class="chip-remove" type="button" aria-label="Remove participant">x</button>
+      </li>
+    </template>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
