@@ -31,25 +31,42 @@
         </div>
       </header>
 
-      <section class="card reveal" aria-labelledby="participant-heading">
+      <section class="card reveal race-card" aria-labelledby="race-heading">
+        <div class="card-header race-header">
+          <h2 id="race-heading">Race View</h2>
+          <p>Icons move based on each person's total steps versus the leader.</p>
+        </div>
+        <ul id="race-list" class="race-list"></ul>
+      </section>
+
+      <section class="card reveal" aria-labelledby="leaderboard-heading">
         <div class="card-header">
-          <h2 id="participant-heading">Participants</h2>
-          <p>Add everyone in your challenge.</p>
+          <h2 id="leaderboard-heading">Leaderboard</h2>
+          <p>Sorted by total steps in the current challenge.</p>
         </div>
 
-        <form id="participant-form" class="inline-form">
-          <label for="participant-name" class="sr-only">Name</label>
-          <input
-            id="participant-name"
-            type="text"
-            maxlength="30"
-            placeholder="Add friend name"
-            required
-          />
-          <button type="submit">Add</button>
-        </form>
+        <div class="leaderboard-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Total</th>
+                <th>Daily Avg</th>
+                <th>Behind Leader</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body"></tbody>
+          </table>
+        </div>
+      </section>
 
-        <ul id="participant-list" class="chip-list"></ul>
+      <section class="card reveal" aria-labelledby="history-heading">
+        <div class="card-header">
+          <h2 id="history-heading">Recent Entries</h2>
+          <p>Last 12 step logs across the group.</p>
+        </div>
+        <ul id="history-list" class="history-list"></ul>
       </section>
 
       <section class="card reveal" aria-labelledby="qr-heading">
@@ -86,42 +103,25 @@
         </form>
       </section>
 
-      <section class="card reveal" aria-labelledby="leaderboard-heading">
+      <section class="card reveal" aria-labelledby="participant-heading">
         <div class="card-header">
-          <h2 id="leaderboard-heading">Leaderboard</h2>
-          <p>Sorted by total steps in the current challenge.</p>
+          <h2 id="participant-heading">Participants</h2>
+          <p>Add everyone in your challenge.</p>
         </div>
 
-        <div class="leaderboard-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Name</th>
-                <th>Total</th>
-                <th>Daily Avg</th>
-                <th>Behind Leader</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboard-body"></tbody>
-          </table>
-        </div>
-      </section>
+        <form id="participant-form" class="inline-form">
+          <label for="participant-name" class="sr-only">Name</label>
+          <input
+            id="participant-name"
+            type="text"
+            maxlength="30"
+            placeholder="Add friend name"
+            required
+          />
+          <button type="submit">Add</button>
+        </form>
 
-      <section class="card reveal race-card" aria-labelledby="race-heading">
-        <div class="card-header race-header">
-          <h2 id="race-heading">Race View</h2>
-          <p>Icons move based on each person's total steps versus the leader.</p>
-        </div>
-        <ul id="race-list" class="race-list"></ul>
-      </section>
-
-      <section class="card reveal" aria-labelledby="history-heading">
-        <div class="card-header">
-          <h2 id="history-heading">Recent Entries</h2>
-          <p>Last 12 step logs across the group.</p>
-        </div>
-        <ul id="history-list" class="history-list"></ul>
+        <ul id="participant-list" class="chip-list"></ul>
       </section>
 
       <section class="card card-actions reveal" aria-label="App Actions">
