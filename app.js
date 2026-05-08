@@ -36,14 +36,6 @@ const defaultState = {
   participantColors: {}
 };
 
-const sampleParticipants = ["Lindsay", "Jordan", "Maya", "Noah"];
-const sampleSteps = [
-  ["Lindsay", 10222],
-  ["Jordan", 12034],
-  ["Maya", 8700],
-  ["Noah", 13510]
-];
-
 const participantForm = document.querySelector("#participant-form");
 const participantNameInput = document.querySelector("#participant-name");
 const participantList = document.querySelector("#participant-list");
@@ -55,12 +47,13 @@ const leaderboardBody = document.querySelector("#leaderboard-body");
 const raceList = document.querySelector("#race-list");
 const qrList = document.querySelector("#qr-list");
 const historyList = document.querySelector("#history-list");
+const calendarGrid = document.querySelector("#calendar-grid");
+const calendarLegend = document.querySelector("#calendar-legend");
 const challengeName = document.querySelector("#challenge-name");
 const challengeRange = document.querySelector("#challenge-range");
 const challengeStatus = document.querySelector("#challenge-status");
-const seedButton = document.querySelector("#seed-button");
-const resetButton = document.querySelector("#reset-button");
 const chipTemplate = document.querySelector("#chip-template");
+const urlPrefillPerson = getUrlPrefillPerson();
 
 let state = structuredClone(defaultState);
 
@@ -101,7 +94,6 @@ function initialize() {
   entryDate.min = CHALLENGE.start;
   entryDate.max = CHALLENGE.end;
   entryDate.value = defaultEntryDate();
-  preFillFromUrl();
   bindEvents();
   renderAll();
 }
@@ -175,44 +167,6 @@ function bindEvents() {
     persistAndRender();
   });
 
-  seedButton.addEventListener("click", () => {
-    if (state.participants.length > 0 || state.entries.length > 0) {
-      const shouldReplace = confirm("This replaces your current data. Continue?");
-      if (!shouldReplace) return;
-    }
-
-    const seededEntries = [];
-    for (let offset = 0; offset < 5; offset += 1) {
-      const date = new Date();
-      date.setDate(date.getDate() - offset);
-      const iso = toISODate(date);
-
-      for (const [person, baseline] of sampleSteps) {
-        const variance = Math.floor(Math.random() * 2500 - 1200);
-        seededEntries.push({ person, date: iso, steps: Math.max(4500, baseline + variance) });
-      }
-    }
-
-    const participantColors = {};
-    sampleParticipants.forEach((name, index) => {
-      participantColors[name] = TEAM_COLOR_PALETTE[index % TEAM_COLOR_PALETTE.length];
-    });
-
-    state = {
-      participants: [...sampleParticipants],
-      entries: seededEntries,
-      participantColors
-    };
-
-    persistAndRender();
-  });
-
-  resetButton.addEventListener("click", () => {
-    const confirmed = confirm("Delete all participants and step entries?");
-    if (!confirmed) return;
-    state = structuredClone(defaultState);
-    persistAndRender();
-  });
 }
 
 function persistAndRender() {
@@ -227,10 +181,12 @@ function renderAll() {
   const leaderboardData = getLeaderboardData();
   renderParticipants();
   renderEntryParticipants();
+  applyUrlPrefillParticipant();
   renderQrCodes();
   renderLeaderboard(leaderboardData);
   renderRaceView(leaderboardData);
   renderHistory();
+  renderCalendar();
 }
 
 function renderParticipants() {
@@ -408,6 +364,105 @@ function renderHistory() {
   }
 }
 
+function renderCalendar() {
+  if (!calendarGrid || !calendarLegend) return;
+
+  calendarGrid.innerHTML = "";
+  calendarLegend.innerHTML = "";
+
+  const dates = getChallengeDates();
+  const firstDate = new Date(`${CHALLENGE.start}T00:00:00`);
+  const leadingBlanks = firstDate.getDay();
+
+  for (let i = 0; i < leadingBlanks; i += 1) {
+    const blank = document.createElement("li");
+    blank.className = "calendar-day calendar-day-blank";
+    blank.setAttribute("aria-hidden", "true");
+    calendarGrid.append(blank);
+  }
+
+  if (state.participants.length === 0) {
+    const empty = document.createElement("li");
+    empty.className = "calendar-empty";
+    empty.textContent = "Add participants to track daily completion.";
+    calendarGrid.append(empty);
+    return;
+  }
+
+  for (const name of state.participants) {
+    const legendItem = document.createElement("li");
+    legendItem.className = "calendar-legend-item";
+    legendItem.innerHTML = `
+      <span class="calendar-legend-swatch" style="--dot-color:${getParticipantColor(name)}"></span>
+      <span>${name}</span>
+    `;
+    calendarLegend.append(legendItem);
+  }
+
+  const entryLookup = getEntryLookupByDay();
+  const todayIso = toISODate(new Date());
+
+  for (const isoDate of dates) {
+    const dayDate = new Date(`${isoDate}T00:00:00`);
+    const dayNumber = dayDate.getDate();
+    const day = document.createElement("li");
+    day.className = "calendar-day";
+    if (isoDate === todayIso) {
+      day.classList.add("is-today");
+    }
+
+    const dayLabel = document.createElement("span");
+    dayLabel.className = "calendar-day-number";
+    dayLabel.textContent = String(dayNumber);
+
+    const dots = document.createElement("div");
+    dots.className = "calendar-dots";
+
+    for (const name of state.participants) {
+      const hasEntry = entryLookup.get(isoDate)?.has(name.toLowerCase()) || false;
+      const dot = document.createElement("span");
+      dot.className = "calendar-dot";
+      if (!hasEntry) {
+        dot.classList.add("is-missing");
+      }
+      dot.style.setProperty("--dot-color", getParticipantColor(name));
+      dot.title = `${name}: ${hasEntry ? "Logged" : "Missing"}`;
+      dots.append(dot);
+    }
+
+    day.append(dayLabel, dots);
+    calendarGrid.append(day);
+  }
+}
+
+function getEntryLookupByDay() {
+  const lookup = new Map();
+
+  for (const entry of state.entries) {
+    if (!isWithinChallenge(entry.date)) continue;
+
+    if (!lookup.has(entry.date)) {
+      lookup.set(entry.date, new Set());
+    }
+
+    lookup.get(entry.date).add(entry.person.toLowerCase());
+  }
+
+  return lookup;
+}
+
+function getChallengeDates() {
+  const start = new Date(`${CHALLENGE.start}T00:00:00`);
+  const end = new Date(`${CHALLENGE.end}T00:00:00`);
+  const dates = [];
+
+  for (let cursor = new Date(start); cursor <= end; cursor.setDate(cursor.getDate() + 1)) {
+    dates.push(toISODate(cursor));
+  }
+
+  return dates;
+}
+
 function saveState(nextState) {
   return stateDoc.set(nextState, { merge: true });
 }
@@ -555,15 +610,24 @@ function getQrLink(name) {
   return `${base}?person=${encodeURIComponent(name)}`;
 }
 
-function preFillFromUrl() {
+function getUrlPrefillPerson() {
   const params = new URLSearchParams(window.location.search);
   const person = params.get("person");
+  return person ? person.trim() : "";
+}
 
-  if (person && state.participants.includes(person)) {
-    entryParticipant.value = person;
-    entryParticipant.focus();
-    entrySteps.focus();
-  }
+function applyUrlPrefillParticipant() {
+  if (!urlPrefillPerson) return;
+
+  const matchedParticipant = state.participants.find(
+    (name) => name.toLowerCase() === urlPrefillPerson.toLowerCase()
+  );
+
+  if (!matchedParticipant) return;
+
+  entryParticipant.value = matchedParticipant;
+  entryParticipant.focus();
+  entrySteps.focus();
 }
 
 function sanitizeId(str) {

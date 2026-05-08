@@ -69,6 +69,24 @@
         <ul id="history-list" class="history-list"></ul>
       </section>
 
+      <section class="card reveal" aria-labelledby="calendar-heading">
+        <div class="card-header">
+          <h2 id="calendar-heading">Entry Calendar</h2>
+          <p>Each day shows who has already logged steps.</p>
+        </div>
+        <div class="calendar-headings" aria-hidden="true">
+          <span>Sun</span>
+          <span>Mon</span>
+          <span>Tue</span>
+          <span>Wed</span>
+          <span>Thu</span>
+          <span>Fri</span>
+          <span>Sat</span>
+        </div>
+        <ul id="calendar-grid" class="calendar-grid"></ul>
+        <ul id="calendar-legend" class="calendar-legend"></ul>
+      </section>
+
       <section class="card reveal" aria-labelledby="qr-heading">
         <div class="card-header">
           <h2 id="qr-heading">QR Code Shortcuts</h2>
@@ -124,10 +142,6 @@
         <ul id="participant-list" class="chip-list"></ul>
       </section>
 
-      <section class="card card-actions reveal" aria-label="App Actions">
-        <button id="seed-button" class="ghost">Load Sample Data</button>
-        <button id="reset-button" class="danger">Reset Challenge</button>
-      </section>
     </main>
 
     <template id="chip-template">
