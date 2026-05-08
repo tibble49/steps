@@ -132,10 +132,11 @@ function bindEvents() {
 
     const existing = state.entries.find((entry) => entry.person === person && entry.date === date);
     if (existing) {
-      existing.steps = steps;
-    } else {
-      state.entries.push({ person, date, steps });
+      alert(`${person} already has an entry for ${formatChallengeDate(date)}.`);
+      return;
     }
+
+    state.entries.push({ person, date, steps });
 
     entrySteps.value = "";
     persistAndRender();
