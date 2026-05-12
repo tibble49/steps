@@ -53,46 +53,13 @@
                 <th>Name</th>
                 <th>Total</th>
                 <th>Daily Avg</th>
+                <th>Behind Next</th>
                 <th>Behind Leader</th>
               </tr>
             </thead>
             <tbody id="leaderboard-body"></tbody>
           </table>
         </div>
-      </section>
-
-      <section class="card reveal" aria-labelledby="history-heading">
-        <div class="card-header">
-          <h2 id="history-heading">Recent Entries</h2>
-          <p>Last 12 step logs across the group.</p>
-        </div>
-        <ul id="history-list" class="history-list"></ul>
-      </section>
-
-      <section class="card reveal" aria-labelledby="calendar-heading">
-        <div class="card-header">
-          <h2 id="calendar-heading">Entry Calendar</h2>
-          <p>Each day shows who has already logged steps.</p>
-        </div>
-        <div class="calendar-headings" aria-hidden="true">
-          <span>Sun</span>
-          <span>Mon</span>
-          <span>Tue</span>
-          <span>Wed</span>
-          <span>Thu</span>
-          <span>Fri</span>
-          <span>Sat</span>
-        </div>
-        <ul id="calendar-grid" class="calendar-grid"></ul>
-        <ul id="calendar-legend" class="calendar-legend"></ul>
-      </section>
-
-      <section class="card reveal" aria-labelledby="qr-heading">
-        <div class="card-header">
-          <h2 id="qr-heading">QR Code Shortcuts</h2>
-          <p>Scan to jump to each person's entry form. Or copy the link to text/email.</p>
-        </div>
-        <ul id="qr-list" class="qr-list"></ul>
       </section>
 
       <section class="card reveal" aria-labelledby="entry-heading">
@@ -121,6 +88,32 @@
         </form>
       </section>
 
+      <section class="card reveal" aria-labelledby="history-heading">
+        <div class="card-header">
+          <h2 id="history-heading">Recent Entries</h2>
+          <p>Last 12 step logs across the group.</p>
+        </div>
+        <ul id="history-list" class="history-list"></ul>
+      </section>
+
+      <section class="card reveal" aria-labelledby="calendar-heading">
+        <div class="card-header">
+          <h2 id="calendar-heading">Entry Calendar</h2>
+          <p>Each day shows who has already logged steps.</p>
+        </div>
+        <div class="calendar-headings" aria-hidden="true">
+          <span>Sun</span>
+          <span>Mon</span>
+          <span>Tue</span>
+          <span>Wed</span>
+          <span>Thu</span>
+          <span>Fri</span>
+          <span>Sat</span>
+        </div>
+        <ul id="calendar-grid" class="calendar-grid"></ul>
+        <ul id="calendar-legend" class="calendar-legend"></ul>
+      </section>
+
       <section class="card reveal" aria-labelledby="participant-heading">
         <div class="card-header">
           <h2 id="participant-heading">Participants</h2>
@@ -140,6 +133,14 @@
         </form>
 
         <ul id="participant-list" class="chip-list"></ul>
+      </section>
+
+      <section class="card reveal" aria-labelledby="qr-heading">
+        <div class="card-header">
+          <h2 id="qr-heading">QR Code Shortcuts</h2>
+          <p>Scan to jump to each person's entry form. Or copy the link to text/email.</p>
+        </div>
+        <ul id="qr-list" class="qr-list"></ul>
       </section>
 
     </main>

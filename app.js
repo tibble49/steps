@@ -240,7 +240,7 @@ function renderLeaderboard(totals) {
 
   if (totals.length === 0) {
     const row = document.createElement("tr");
-    row.innerHTML = '<td colspan="5">No data yet.</td>';
+    row.innerHTML = '<td colspan="6">No data yet.</td>';
     leaderboardBody.append(row);
     return;
   }
@@ -248,14 +248,17 @@ function renderLeaderboard(totals) {
   const leaderTotal = totals[0].total;
 
   totals.forEach((item, index) => {
-    const behind = Math.max(0, leaderTotal - item.total);
+    const behindLeader = Math.max(0, leaderTotal - item.total);
+    const prevTotal = index > 0 ? totals[index - 1].total : null;
+    const behindNext = prevTotal !== null ? Math.max(0, prevTotal - item.total) : 0;
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${index + 1}</td>
       <td>${item.name}</td>
       <td>${formatNumber(item.total)}</td>
       <td>${formatNumber(item.average)}</td>
-      <td>${behind === 0 ? "Leader" : `${formatNumber(behind)} behind`}</td>
+      <td>${index === 0 ? "—" : `${formatNumber(behindNext)} behind`}</td>
+      <td>${behindLeader === 0 ? "Leader" : `${formatNumber(behindLeader)} behind`}</td>
     `;
     leaderboardBody.append(row);
   });
