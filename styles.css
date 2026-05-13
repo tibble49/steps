@@ -66,12 +66,39 @@ button,
 }
 
 .hero {
+  position: relative;
   background: linear-gradient(130deg, #0f8f80, #0f6877);
   color: #f8fcfb;
   border-radius: 24px;
   padding: 1.6rem;
   box-shadow: var(--shadow);
   animation: hero-fade 550ms ease-out;
+}
+
+.hero-shoutout {
+  position: absolute;
+  right: 1.2rem;
+  top: 1rem;
+  max-width: 19rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 12px;
+  border: 1px solid rgba(235, 255, 250, 0.36);
+  background: rgba(4, 41, 47, 0.32);
+  text-align: right;
+}
+
+.hero-shoutout-label {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #c7fff4;
+}
+
+#hero-shoutout-value {
+  margin: 0.2rem 0 0;
+  font-weight: 700;
+  color: #f5fffd;
 }
 
 .eyebrow {
@@ -597,6 +624,18 @@ tbody tr:first-child td {
 }
 
 @media (max-width: 820px) {
+  .hero {
+    padding-top: 5.2rem;
+  }
+
+  .hero-shoutout {
+    left: 1rem;
+    right: 1rem;
+    top: 1rem;
+    max-width: none;
+    text-align: left;
+  }
+
   .entry-form {
     grid-template-columns: 1fr 1fr;
   }

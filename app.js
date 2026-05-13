@@ -52,6 +52,7 @@ const calendarLegend = document.querySelector("#calendar-legend");
 const challengeName = document.querySelector("#challenge-name");
 const challengeRange = document.querySelector("#challenge-range");
 const challengeStatus = document.querySelector("#challenge-status");
+const heroShoutoutValue = document.querySelector("#hero-shoutout-value");
 const chipTemplate = document.querySelector("#chip-template");
 const urlPrefillPerson = getUrlPrefillPerson();
 
@@ -183,11 +184,42 @@ function renderAll() {
   renderParticipants();
   renderEntryParticipants();
   applyUrlPrefillParticipant();
+  renderHeroShoutout();
   renderQrCodes();
   renderLeaderboard(leaderboardData);
   renderRaceView(leaderboardData);
   renderHistory();
   renderCalendar();
+}
+
+function renderHeroShoutout() {
+  if (!heroShoutoutValue) return;
+
+  const validEntries = state.entries.filter(
+    (entry) => isWithinChallenge(entry.date) && Number.isFinite(entry.steps)
+  );
+
+  if (validEntries.length === 0) {
+    heroShoutoutValue.textContent = "Waiting for first entry...";
+    return;
+  }
+
+  const topSteps = Math.max(...validEntries.map((entry) => entry.steps));
+  const topEntries = validEntries.filter((entry) => entry.steps === topSteps);
+  const uniqueNames = [...new Set(topEntries.map((entry) => entry.person))].sort((a, b) =>
+    a.localeCompare(b)
+  );
+
+  if (uniqueNames.length === 1) {
+    const topEntry = topEntries
+      .slice()
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .at(-1);
+    heroShoutoutValue.textContent = `${uniqueNames[0]} with ${formatNumber(topSteps)} on ${formatChallengeDate(topEntry.date)}`;
+    return;
+  }
+
+  heroShoutoutValue.textContent = `${uniqueNames.join(", ")} tied at ${formatNumber(topSteps)} steps`;
 }
 
 function renderParticipants() {

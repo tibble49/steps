@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>StepSprint Showdown</title>
+    <title>Step Challenge</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -20,10 +20,14 @@
     <main class="app-shell">
       <header class="hero">
         <p class="eyebrow">Friendly Rivalry Tracker</p>
-        <h1>StepSprint Showdown</h1>
+        <h1>Step Challenge</h1>
         <p class="hero-copy">
           Track daily steps, compare totals, and crown the monthly walking champion.
         </p>
+        <aside class="hero-shoutout" aria-live="polite">
+          <p class="hero-shoutout-label">Single-Day Shout-Out</p>
+          <p id="hero-shoutout-value">Waiting for first entry...</p>
+        </aside>
         <div class="challenge-strip">
           <p><strong id="challenge-name"></strong></p>
           <p id="challenge-range"></p>

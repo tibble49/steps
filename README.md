@@ -1,4 +1,4 @@
-# StepSprint Showdown
+# Step Challenge
 
 A lightweight web app to track a walking challenge between friends.
 
