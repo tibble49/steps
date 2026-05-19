@@ -272,7 +272,7 @@ function renderLeaderboard(totals) {
 
   if (totals.length === 0) {
     const row = document.createElement("tr");
-    row.innerHTML = '<td colspan="6">No data yet.</td>';
+    row.innerHTML = '<td colspan="7">No data yet.</td>';
     leaderboardBody.append(row);
     return;
   }
@@ -288,6 +288,7 @@ function renderLeaderboard(totals) {
       <td>${index + 1}</td>
       <td>${item.name}</td>
       <td>${formatNumber(item.total)}</td>
+      <td>${formatNumber(item.highestSingleDay)}</td>
       <td>${formatNumber(item.average)}</td>
       <td>${index === 0 ? "—" : `${formatNumber(behindNext)} behind`}</td>
       <td>${behindLeader === 0 ? "Leader" : `${formatNumber(behindLeader)} behind`}</td>
@@ -340,8 +341,11 @@ function getLeaderboardData() {
       (entry) => entry.person === name && isWithinChallenge(entry.date)
     );
     const total = personEntries.reduce((sum, entry) => sum + entry.steps, 0);
+    const highestSingleDay = personEntries.length
+      ? Math.max(...personEntries.map((entry) => entry.steps))
+      : 0;
     const average = personEntries.length ? Math.round(total / personEntries.length) : 0;
-    return { name, total, average };
+    return { name, total, highestSingleDay, average };
   });
 
   totals.sort((a, b) => b.total - a.total);
@@ -576,10 +580,13 @@ function challengeStatusText() {
 }
 
 function defaultEntryDate() {
-  const todayIso = toISODate(new Date());
-  if (todayIso < CHALLENGE.start) return CHALLENGE.start;
-  if (todayIso > CHALLENGE.end) return CHALLENGE.end;
-  return todayIso;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayIso = toISODate(yesterday);
+
+  if (yesterdayIso < CHALLENGE.start) return CHALLENGE.start;
+  if (yesterdayIso > CHALLENGE.end) return CHALLENGE.end;
+  return yesterdayIso;
 }
 
 function formatChallengeDate(isoDate) {
