@@ -14,9 +14,10 @@ const stateDoc = db.collection("challenge").doc("state");
 // ─────────────────────────────────────────────────────────────────────────────
 
 const CHALLENGE = {
-  name: "May Step Challenge",
-  start: "2026-05-01",
-  end: "2026-05-31"
+  key: "2026-06",
+  name: "June Step Challenge",
+  start: "2026-06-01",
+  end: "2026-06-30"
 };
 
 const TEAM_COLOR_PALETTE = [
@@ -33,7 +34,8 @@ const TEAM_COLOR_PALETTE = [
 const defaultState = {
   participants: [],
   entries: [],
-  participantColors: {}
+  participantColors: {},
+  challengeKey: CHALLENGE.key
 };
 
 const participantForm = document.querySelector("#participant-form");
@@ -91,6 +93,15 @@ async function startApp() {
 startApp();
 
 function initialize() {
+  const didResetForNewChallenge = resetForNewChallengeIfNeeded();
+
+  if (didResetForNewChallenge) {
+    saveState(state).catch((err) => {
+      console.error("Failed to save fresh challenge reset:", err);
+      alert("⚠️ Could not fully reset previous challenge data in the database.");
+    });
+  }
+
   renderChallengeMeta();
   entryDate.min = CHALLENGE.start;
   entryDate.max = CHALLENGE.end;
@@ -127,7 +138,11 @@ function bindEvents() {
     }
 
     if (!isWithinChallenge(date)) {
-      alert("Entries must be between May 1 and May 31, 2026.");
+      alert(
+        `Entries must be between ${formatChallengeDate(CHALLENGE.start)} and ${formatChallengeDate(
+          CHALLENGE.end
+        )}.`
+      );
       return;
     }
 
@@ -375,6 +390,7 @@ function renderHistory() {
   historyList.innerHTML = "";
 
   const sorted = [...state.entries]
+    .filter((entry) => isWithinChallenge(entry.date))
     .sort((a, b) => (a.date < b.date ? 1 : -1))
     .slice(0, 12);
 
@@ -519,8 +535,19 @@ function parseState(data) {
     entries: Array.isArray(data.entries)
       ? data.entries.filter(isValidEntry)
       : [],
-    participantColors
+    participantColors,
+    challengeKey: typeof data.challengeKey === "string" ? data.challengeKey : ""
   };
+}
+
+function resetForNewChallengeIfNeeded() {
+  if (state.challengeKey === CHALLENGE.key) {
+    return false;
+  }
+
+  state.entries = [];
+  state.challengeKey = CHALLENGE.key;
+  return true;
 }
 
 function isValidEntry(entry) {
@@ -573,7 +600,7 @@ function challengeStatusText() {
     return `Starts in ${days} day${days === 1 ? "" : "s"}`;
   }
   if (todayIso > CHALLENGE.end) {
-    return "May challenge complete. Ready for the next challenge window.";
+    return `${CHALLENGE.name} complete. Ready for the next challenge window.`;
   }
   const daysLeft = dateDiffInDays(todayIso, CHALLENGE.end) + 1;
   return `Live now: ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`;

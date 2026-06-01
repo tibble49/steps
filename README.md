@@ -7,14 +7,15 @@ A lightweight web app to track a walking challenge between friends.
 - Add and remove participants
 - Set team colors per participant
 - Log daily steps per participant
-- Auto-update existing entries when the same person/date is re-entered
+- Block duplicate entries for the same person and date
 - Live leaderboard with totals and daily averages
 - Visual race view with moving icons based on leaderboard position
 - QR code shortcuts per participant (scan or copy link for quick entry)
 - Recent activity feed
-- Local persistence using browser `localStorage`
-- Sample-data seeding for quick demos
-- First challenge window locked to May 1 to May 31, 2026
+- Entry calendar showing daily completion by participant
+- Cloud persistence using Firebase Firestore
+- Current challenge window locked to June 1 to June 30, 2026
+- Automatic fresh reset when challenge month changes (participants/colors kept, entries cleared)
 
 ## Run
 
@@ -25,5 +26,4 @@ No build tools or installs are required.
 
 ## Notes
 
-- Data is stored locally in your browser profile.
-- "Reset Challenge" clears all stored data for this app.
+- Data is stored in Firebase Firestore under `challenge/state`.
