@@ -287,7 +287,7 @@ function renderLeaderboard(totals) {
 
   if (totals.length === 0) {
     const row = document.createElement("tr");
-    row.innerHTML = '<td colspan="7">No data yet.</td>';
+    row.innerHTML = '<td colspan="8">No data yet.</td>';
     leaderboardBody.append(row);
     return;
   }
@@ -305,6 +305,7 @@ function renderLeaderboard(totals) {
       <td>${formatNumber(item.total)}</td>
       <td>${formatNumber(item.highestSingleDay)}</td>
       <td>${formatNumber(item.average)}</td>
+      <td>${formatAverageValue(item.lastMonthAverage)}</td>
       <td>${index === 0 ? "—" : `${formatNumber(behindNext)} behind`}</td>
       <td>${behindLeader === 0 ? "Leader" : `${formatNumber(behindLeader)} behind`}</td>
     `;
@@ -351,16 +352,28 @@ function renderRaceView(totals) {
 }
 
 function getLeaderboardData() {
+  const previousChallengeWindow = getPreviousChallengeWindow();
   const totals = state.participants.map((name) => {
     const personEntries = state.entries.filter(
       (entry) => entry.person === name && isWithinChallenge(entry.date)
+    );
+    const previousMonthEntries = state.entries.filter(
+      (entry) =>
+        entry.person === name &&
+        entry.date >= previousChallengeWindow.start &&
+        entry.date <= previousChallengeWindow.end
     );
     const total = personEntries.reduce((sum, entry) => sum + entry.steps, 0);
     const highestSingleDay = personEntries.length
       ? Math.max(...personEntries.map((entry) => entry.steps))
       : 0;
     const average = personEntries.length ? Math.round(total / personEntries.length) : 0;
-    return { name, total, highestSingleDay, average };
+    const previousMonthTotal = previousMonthEntries.reduce((sum, entry) => sum + entry.steps, 0);
+    const lastMonthAverage = previousMonthEntries.length
+      ? Math.round(previousMonthTotal / previousMonthEntries.length)
+      : null;
+
+    return { name, total, highestSingleDay, average, lastMonthAverage };
   });
 
   totals.sort((a, b) => b.total - a.total);
@@ -528,13 +541,16 @@ function parseState(data) {
     data.participantColors && typeof data.participantColors === "object"
       ? data.participantColors
       : {};
+
+  const normalizedEntries = Array.isArray(data.entries)
+    ? data.entries.map(normalizeEntry).filter(Boolean)
+    : [];
+
   return {
     participants: Array.isArray(data.participants)
       ? data.participants.filter((p) => typeof p === "string")
       : [],
-    entries: Array.isArray(data.entries)
-      ? data.entries.filter(isValidEntry)
-      : [],
+    entries: normalizedEntries,
     participantColors,
     challengeKey: typeof data.challengeKey === "string" ? data.challengeKey : ""
   };
@@ -545,22 +561,63 @@ function resetForNewChallengeIfNeeded() {
     return false;
   }
 
-  state.entries = [];
   state.challengeKey = CHALLENGE.key;
   return true;
 }
 
-function isValidEntry(entry) {
-  return (
-    entry &&
-    typeof entry.person === "string" &&
-    typeof entry.date === "string" &&
-    typeof entry.steps === "number"
-  );
+function normalizeEntry(entry) {
+  if (!entry || typeof entry.person !== "string") {
+    return null;
+  }
+
+  const date = normalizeIsoDate(entry.date);
+  const steps = Number(entry.steps);
+
+  if (!date || !Number.isFinite(steps) || steps < 0) {
+    return null;
+  }
+
+  return {
+    person: entry.person,
+    date,
+    steps
+  };
+}
+
+function normalizeIsoDate(value) {
+  if (typeof value === "string") {
+    const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (match) {
+      return match[1];
+    }
+
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      return toISODate(parsed);
+    }
+    return null;
+  }
+
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return toISODate(value);
+  }
+
+  if (value && typeof value.toDate === "function") {
+    const date = value.toDate();
+    if (date instanceof Date && !Number.isNaN(date.getTime())) {
+      return toISODate(date);
+    }
+  }
+
+  return null;
 }
 
 function formatNumber(value) {
   return new Intl.NumberFormat().format(value);
+}
+
+function formatAverageValue(value) {
+  return value === null ? "—" : formatNumber(value);
 }
 
 function toISODate(date) {
@@ -585,6 +642,21 @@ function pickColorForName(name, index) {
 
 function isWithinChallenge(isoDate) {
   return isoDate >= CHALLENGE.start && isoDate <= CHALLENGE.end;
+}
+
+function getPreviousChallengeWindow() {
+  const currentStart = new Date(`${CHALLENGE.start}T00:00:00`);
+  const previousMonthStart = new Date(currentStart);
+  previousMonthStart.setMonth(previousMonthStart.getMonth() - 1);
+  previousMonthStart.setDate(1);
+
+  const previousMonthEnd = new Date(currentStart);
+  previousMonthEnd.setDate(0);
+
+  return {
+    start: toISODate(previousMonthStart),
+    end: toISODate(previousMonthEnd)
+  };
 }
 
 function renderChallengeMeta() {
