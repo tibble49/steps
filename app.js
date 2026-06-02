@@ -35,6 +35,7 @@ const defaultState = {
   participants: [],
   entries: [],
   participantColors: {},
+  participantLastMonthAverages: {},
   challengeKey: CHALLENGE.key
 };
 
@@ -169,6 +170,7 @@ function bindEvents() {
     state.participants = state.participants.filter((participant) => participant !== name);
     state.entries = state.entries.filter((entry) => entry.person !== name);
     delete state.participantColors[name];
+    delete state.participantLastMonthAverages[name];
     persistAndRender();
   });
 
@@ -372,8 +374,17 @@ function getLeaderboardData() {
     const lastMonthAverage = previousMonthEntries.length
       ? Math.round(previousMonthTotal / previousMonthEntries.length)
       : null;
+    const manualLastMonthAverage = state.participantLastMonthAverages[name];
 
-    return { name, total, highestSingleDay, average, lastMonthAverage };
+    return {
+      name,
+      total,
+      highestSingleDay,
+      average,
+      lastMonthAverage: Number.isFinite(manualLastMonthAverage)
+        ? manualLastMonthAverage
+        : lastMonthAverage
+    };
   });
 
   totals.sort((a, b) => b.total - a.total);
@@ -541,6 +552,10 @@ function parseState(data) {
     data.participantColors && typeof data.participantColors === "object"
       ? data.participantColors
       : {};
+  const participantLastMonthAverages =
+    data.participantLastMonthAverages && typeof data.participantLastMonthAverages === "object"
+      ? data.participantLastMonthAverages
+      : {};
 
   const normalizedEntries = Array.isArray(data.entries)
     ? data.entries.map(normalizeEntry).filter(Boolean)
@@ -552,6 +567,7 @@ function parseState(data) {
       : [],
     entries: normalizedEntries,
     participantColors,
+    participantLastMonthAverages: normalizeParticipantAverages(participantLastMonthAverages),
     challengeKey: typeof data.challengeKey === "string" ? data.challengeKey : ""
   };
 }
@@ -610,6 +626,19 @@ function normalizeIsoDate(value) {
   }
 
   return null;
+}
+
+function normalizeParticipantAverages(values) {
+  const normalized = {};
+
+  for (const [name, rawValue] of Object.entries(values)) {
+    const value = Number(rawValue);
+    if (typeof name === "string" && Number.isFinite(value) && value >= 0) {
+      normalized[name] = Math.round(value);
+    }
+  }
+
+  return normalized;
 }
 
 function formatNumber(value) {
