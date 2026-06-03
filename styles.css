@@ -288,11 +288,6 @@ td.daily-avg-down {
   font-weight: 700;
 }
 
-tbody tr:first-child td {
-  font-weight: 700;
-  color: #0d6c60;
-}
-
 .race-card {
   background: linear-gradient(160deg, #fff7eb 0%, #fffdf8 50%, #eefaf5 100%);
 }
