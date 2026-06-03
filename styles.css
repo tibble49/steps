@@ -278,6 +278,16 @@ th {
   font-weight: 600;
 }
 
+td.daily-avg-up {
+  color: #1f7a4f;
+  font-weight: 700;
+}
+
+td.daily-avg-down {
+  color: #c5453a;
+  font-weight: 700;
+}
+
 tbody tr:first-child td {
   font-weight: 700;
   color: #0d6c60;

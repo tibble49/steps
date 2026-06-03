@@ -9,6 +9,7 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 const db = firebase.firestore();
 const stateDoc = db.collection("challenge").doc("state");
 // ─────────────────────────────────────────────────────────────────────────────
@@ -63,6 +64,13 @@ let state = structuredClone(defaultState);
 
 async function startApp() {
   try {
+    await ensureAnonymousSession();
+  } catch (err) {
+    console.error("Failed to establish anonymous auth session.", err);
+    alert("⚠️ Secure session setup failed. Database access may not work until you refresh.");
+  }
+
+  try {
     console.log("Loading state from Firestore...");
     const snap = await stateDoc.get();
     if (snap.exists) {
@@ -92,6 +100,16 @@ async function startApp() {
 }
 
 startApp();
+
+async function ensureAnonymousSession() {
+  if (auth.currentUser) {
+    return auth.currentUser;
+  }
+
+  const result = await auth.signInAnonymously();
+  console.log("Anonymous auth ready:", result.user?.uid || "unknown-user");
+  return result.user;
+}
 
 function initialize() {
   const didResetForNewChallenge = resetForNewChallengeIfNeeded();
@@ -300,13 +318,14 @@ function renderLeaderboard(totals) {
     const behindLeader = Math.max(0, leaderTotal - item.total);
     const prevTotal = index > 0 ? totals[index - 1].total : null;
     const behindNext = prevTotal !== null ? Math.max(0, prevTotal - item.total) : 0;
+    const dailyAverageTrendClass = getDailyAverageTrendClass(item);
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${index + 1}</td>
       <td>${item.name}</td>
       <td>${formatNumber(item.total)}</td>
       <td>${formatNumber(item.highestSingleDay)}</td>
-      <td>${formatNumber(item.average)}</td>
+      <td class="${dailyAverageTrendClass}">${formatNumber(item.average)}</td>
       <td>${formatAverageValue(item.lastMonthAverage)}</td>
       <td>${index === 0 ? "—" : `${formatNumber(behindNext)} behind`}</td>
       <td>${behindLeader === 0 ? "Leader" : `${formatNumber(behindLeader)} behind`}</td>
@@ -381,6 +400,7 @@ function getLeaderboardData() {
       total,
       highestSingleDay,
       average,
+      entryCount: personEntries.length,
       lastMonthAverage: Number.isFinite(manualLastMonthAverage)
         ? manualLastMonthAverage
         : lastMonthAverage
@@ -408,6 +428,14 @@ function getRunnerIcon(name) {
     hash |= 0;
   }
   return icons[Math.abs(hash) % icons.length];
+}
+
+function getDailyAverageTrendClass(item) {
+  if (item.entryCount === 0 || item.lastMonthAverage === null) {
+    return "";
+  }
+
+  return item.average >= item.lastMonthAverage ? "daily-avg-up" : "daily-avg-down";
 }
 
 function renderHistory() {

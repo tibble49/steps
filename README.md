@@ -27,3 +27,16 @@ No build tools or installs are required.
 ## Notes
 
 - Data is stored in Firebase Firestore under `challenge/state`.
+- Firebase Authentication anonymous sign-in must be enabled for client access.
+- Firestore rules should require authenticated users, for example:
+
+```rules
+rules_version = '2';
+service cloud.firestore {
+	match /databases/{database}/documents {
+		match /{document=**} {
+			allow read, write: if request.auth != null;
+		}
+	}
+}
+```
