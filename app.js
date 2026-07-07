@@ -15,10 +15,10 @@ const stateDoc = db.collection("challenge").doc("state");
 // ─────────────────────────────────────────────────────────────────────────────
 
 const CHALLENGE = {
-  key: "2026-06",
-  name: "June Step Challenge",
-  start: "2026-06-01",
-  end: "2026-06-30"
+  key: "2026-07",
+  name: "July Step Challenge",
+  start: "2026-07-01",
+  end: "2026-07-31"
 };
 
 const TEAM_COLOR_PALETTE = [
